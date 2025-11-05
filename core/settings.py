@@ -91,16 +91,19 @@ AUTHENTICATION_BACKENDS = [
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.getenv('MYSQLDATABASE'),
-        'USER': os.getenv('MYSQLUSER'),
-        'PASSWORD': os.getenv('MYSQLPASSWORD'),
-        'HOST': os.getenv('MYSQLHOST'),
-        'PORT': os.getenv('MYSQLPORT'),
+        'NAME': 'railway',               # from URL
+        'USER': 'root',                  # from URL
+        'PASSWORD': 'AenrFHEgceuIzJzMZgIKCIiXoYtGfEWq',     # replace with actual password
+        'HOST': 'crossover.proxy.rlwy.net',  # public host
+        'PORT': '38478',                 # public port
     }
 }
+
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
