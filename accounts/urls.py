@@ -44,7 +44,6 @@ urlpatterns = [
     path("api/update-bottle/", csrf_exempt(views.update_bottle_count), name="update_bottle_count"),
     path('api/get-redemption-details/', views.api_get_redemption_details, name='api_get_redemption_details'),
     path('signup/', views.signup, name='signup'),
-    path('api/login/', csrf_exempt(views.login_user), name='api_login_user'),
 
     
 

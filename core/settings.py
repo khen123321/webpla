@@ -64,6 +64,8 @@ MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
+
+
 ROOT_URLCONF = 'core.urls'
 
 TEMPLATES = [
