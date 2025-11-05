@@ -1300,13 +1300,13 @@ def update_bottle_count(request):
 @csrf_exempt
 def send_otp(request):
     try:
-        print("Request body:", request.body)  # Debug
+        print("Request body:", request.body)  # debug log
         data = json.loads(request.body)
-        print("Parsed JSON:", data)  # Debug
         email = data.get('email')
         if not email:
             return JsonResponse({'error': 'Email is required'}, status=400)
-         code = str(randint(100000, 999999))
+
+        code = str(randint(100000, 999999))
 
         # Mark previous OTPs as verified/used
         OTP.objects.filter(email=email, is_verified=False).update(is_verified=True)
@@ -1317,7 +1317,7 @@ def send_otp(request):
 
         return JsonResponse({'message': f'OTP sent to {email}'})
     except Exception as e:
-        print("Error sending OTP:", e)  # Debug
+        print("Error sending OTP:", e)  # log full error
         return JsonResponse({'error': str(e)}, status=500)
     
 @csrf_exempt
