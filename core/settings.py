@@ -60,6 +60,8 @@ MIDDLEWARE = [
     'accounts.middleware.UpdateLastActiveMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'core.urls'
@@ -153,8 +155,8 @@ OTP_EMAIL_BODY_TEMPLATE = 'Your OTP code is: {otp_code}. It will expire in 10 mi
 OTP_VALIDITY = 600  # 10 minutes in seconds
 
 # Media files
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Authentication settings
 LOGIN_URL = 'login'
