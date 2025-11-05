@@ -1307,23 +1307,30 @@ def send_otp(request):
 
         code = str(randint(100000, 999999))
 
-        # 🔄 Mark previous OTPs as verified/used
+        # Mark previous OTPs as verified/used
         OTP.objects.filter(email=email, is_verified=False).update(is_verified=True)
 
-        # ✅ Create new OTP
+        # Create new OTP
         otp = OTP.objects.create(email=email, code=code)
         print(f"📨 New OTP created for {email}: {code}")
 
-        # Send email
-        send_mail(
-            'Your OTP Code',
-            f'Your OTP is {code}. It expires in 10 minutes.',
-            'your-email@gmail.com',
-            [email],
-            fail_silently=False
-        )
+        # Send email (optional)
+        try:
+            send_mail(
+                'Your OTP Code',
+                f'Your OTP is {code}. It expires in 10 minutes.',
+                'your-email@gmail.com',
+                [email],
+                fail_silently=False
+            )
+        except Exception as e:
+            print("⚠️ Email sending failed:", e)
 
+        # Always return JSON, even if email fails
         return JsonResponse({'message': f'OTP sent to {email}'})
+    
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON in request body'}, status=400)
     except Exception as e:
         print("❌ Error sending OTP:", e)
         return JsonResponse({'error': str(e)}, status=500)
