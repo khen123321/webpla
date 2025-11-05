@@ -149,11 +149,13 @@ STATICFILES_DIRS = [
 
 # Email Configuration for OTP
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'  # or your email provider
+EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'p.lament.2025.c@gmail.com'  # Replace with your email
-EMAIL_HOST_PASSWORD = 'gagp bgat tlcn woen'  # Use App Password for Gmail
+EMAIL_USE_SSL = False
+EMAIL_HOST_USER = 'p.lament.2025.c@gmail.com'  # your Gmail
+EMAIL_HOST_PASSWORD = 'gagp bgat tlcn woen'  # Gmail app password
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
 
