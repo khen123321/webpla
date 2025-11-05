@@ -10,7 +10,6 @@ from django.templatetags.static import static
 from django.utils import timezone
 from datetime import timedelta
 import random
-from .models import OTP
 
 class PasswordResetOTP(models.Model):
     # CHANGED: on_delete=models.CASCADE ensures deletion when the User is deleted.
