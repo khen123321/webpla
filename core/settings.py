@@ -163,6 +163,7 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
 
+
 # OTP Settings
 OTP_EMAIL_SUBJECT = 'Your OTP Code'
 OTP_EMAIL_BODY_TEMPLATE = 'Your OTP code is: {otp_code}. It will expire in 10 minutes.'
