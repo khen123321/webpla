@@ -1297,13 +1297,18 @@ def update_bottle_count(request):
     return JsonResponse({"success": False, "message": "POST only"})
 
 
+
 @csrf_exempt
 def send_otp(request):
-    try:
-        print("Request body:", request.body)  # debug
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Invalid method'}, status=405)
 
-        data = json.loads(request.body)
+    try:
+        # Read request.body only once
+        body = request.body
+        data = json.loads(body)
         email = data.get('email')
+
         if not email:
             return JsonResponse({'error': 'Email is required'}, status=400)
 
@@ -1317,11 +1322,11 @@ def send_otp(request):
 
         # Send email
         send_mail(
-            'Your OTP Code',
-            f'Your OTP is {code}. It expires in 10 minutes.',
-            'p.lament.2025.c@gmail.com',  # your email
-            [email],
-            fail_silently=False
+            subject='Your OTP Code',
+            message=f'Your OTP is {code}. It expires in 10 minutes.',
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=[email],
+            fail_silently=False,
         )
 
         return JsonResponse({'message': f'OTP sent to {email}'})
