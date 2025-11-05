@@ -175,12 +175,15 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://localhost:8000",
+    "https://webpla-production.up.railway.app",
+
 ]
 
 # CSRF Settings - Relaxed for development
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
     "http://localhost:8000",
+    "https://webpla-production.up.railway.app",
 ]
 
 CSRF_COOKIE_SECURE = False  # Set to False for HTTP development
