@@ -45,6 +45,7 @@ urlpatterns = [
     path('api/get-redemption-details/', views.api_get_redemption_details, name='api_get_redemption_details'),
     path('signup/', views.signup, name='signup'),
 
+
     
 
 
