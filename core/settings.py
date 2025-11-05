@@ -151,7 +151,7 @@ EMAIL_HOST = 'smtp.gmail.com'  # or your email provider
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'p.lament.2025.c@gmail.com'  # Replace with your email
-EMAIL_HOST_PASSWORD = 'jckv leje ixqq vobi'  # Use App Password for Gmail
+EMAIL_HOST_PASSWORD = 'euah egot ruyn olqi'  # Use App Password for Gmail
 
 
 # OTP Settings
