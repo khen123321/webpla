@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-1mi80#g&ml8(^l(6ka^zzlj%t7d^1j^s@9k7&wyzknf97lrvzu
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['webpla-production.up.railway.app', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['webpla-production.up.railway.app']
 
 # Application definition
 

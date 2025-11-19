@@ -25,7 +25,6 @@ urlpatterns = [
     path('users/', views.users_view, name='users'),
     path('users/suggest/', views.user_suggestions, name='user_suggestions'),
     path('forgot/', views.forgot_password_view, name='forgot_password'),
-    path('send-otp/', views.send_otp, name='send_otp'),
     path('verify-otp/', views.verify_otp, name='verify_otp'),
     path('forgot-password/', ForgotPasswordView.as_view(), name='forgot-password'),
     path('reset-password/', ResetPasswordView.as_view(), name='reset-password'),
@@ -45,6 +44,8 @@ urlpatterns = [
     path('api/get-redemption-details/', views.api_get_redemption_details, name='api_get_redemption_details'),
     path('signup/', views.signup, name='signup'),
     path('api/login/', csrf_exempt(views.login_user), name='api_login_user'),
+    path('api/send-otp/', csrf_exempt(views.send_otp), name='api_send_otp'),
+    path('api/verify-otp/', csrf_exempt(views.verify_otp), name='api_verify_otp'),
 
     
 
