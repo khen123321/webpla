@@ -1268,19 +1268,21 @@ def update_bottle_count(request):
 
 @csrf_exempt
 def send_otp(request):
-    if request.method != "POST":
-        return JsonResponse({'error': 'POST request required'}, status=400)
-
     try:
-        # Read JSON safely
-        data = json.loads(request.body.decode('utf-8'))
+        if request.method != 'POST':
+            return JsonResponse({'error': 'POST request required'}, status=400)
+
+        # Read body once
+        body_unicode = request.body.decode('utf-8')
+        data = json.loads(body_unicode)
+
         email = data.get('email')
         if not email:
             return JsonResponse({'error': 'Email is required'}, status=400)
 
         code = str(randint(100000, 999999))
 
-        # Mark previous OTPs as used
+        # Mark previous OTPs as verified/used
         OTP.objects.filter(email=email, is_verified=False).update(is_verified=True)
 
         # Create new OTP
@@ -1291,7 +1293,7 @@ def send_otp(request):
         send_mail(
             'Your OTP Code',
             f'Your OTP is {code}. It expires in 10 minutes.',
-            'p.lament.2025.c@gmail.com',
+            'your-email@gmail.com',  # <-- replace with settings.EMAIL_HOST_USER if you want
             [email],
             fail_silently=False
         )
