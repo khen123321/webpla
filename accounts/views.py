@@ -200,7 +200,7 @@ class SendOTPView(APIView):
         email = request.data.get("email")
         if not email:
             return Response({"error": "Email is required"}, status=400)
-        
+
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
@@ -208,14 +208,27 @@ class SendOTPView(APIView):
 
         # Generate OTP
         otp_code = PasswordResetOTP.generate_otp()
+        otp_obj = PasswordResetOTP.objects.create(user=user, otp=otp_code)
+
+        # Send email via SMTP
         try:
-            otp_obj = PasswordResetOTP.objects.create(user=user, otp=otp_code)
+            send_mail(
+                subject="Your OTP Code",
+                message=f"Your OTP code is: {otp_code}",
+                from_email=settings.EMAIL_HOST_USER,
+                recipient_list=[email],
+                fail_silently=False,
+            )
+            print(f"📨 OTP sent to {email}: {otp_code}")
         except Exception as e:
             print(f"❌ Error sending OTP: {e}")
-            return Response({"error": str(e)}, status=500)
-        
-        print(f"📨 OTP for {email}: {otp_code}")
-        return Response({"message": f"OTP sent to {email}", "otp": otp_code}, status=200)
+            return Response({"error": "Failed to send OTP email"}, status=500)
+
+        # Return JSON with OTP for React
+        return Response(
+            {"message": f"OTP sent to {email}", "otp": otp_code},
+            status=200
+        )
 
 
 # 6️⃣ Verify OTP View
