@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-1mi80#g&ml8(^l(6ka^zzlj%t7d^1j^s@9k7&wyzknf97lrvzu
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '172.22.29.97', '192.168.18.4','192.168.8.41']
+ALLOWED_HOSTS = ['webpla-production.up.railway.app', '127.0.0.1', 'localhost']
 
 # Application definition
 
@@ -138,6 +138,9 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS') == 'True' 
 EMAIL_USE_SSL = False
+
+
+
 
 
 
