@@ -86,11 +86,11 @@ def send_forgot_password_otp(request):
 
         # Send email
         send_mail(
-            'Your OTP Code',
-            f'Your OTP is {code}. It expires in 10 minutes.',
-            'no-reply@example.com',
-            [user.email],
-            fail_silently=False
+        'Your OTP Code',
+         f'Your OTP is {code}. It expires in 10 minutes.',
+         settings.EMAIL_HOST_USER,
+         [email],
+        fail_silently=False
         )
 
         return Response({'success': True, 'message': 'OTP sent to your email'}, status=200)
