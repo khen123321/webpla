@@ -1,1 +1,1 @@
-web: gunicorn webpla.wsgi
+web: gunicorn core.wsgi
