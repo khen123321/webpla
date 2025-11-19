@@ -58,6 +58,8 @@ from django.contrib.auth import get_user_model
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from .serializers import ForgotPasswordOTPSerializer, VerifyForgotPasswordOTPSerializer
+from core.utils.email import send_otp_email
+
 
 
 OTP_STORE = {}
@@ -1291,32 +1293,25 @@ def send_otp(request):
             return JsonResponse({'error': 'POST request required'}, status=400)
 
         # Read body once
-        body_unicode = request.body.decode('utf-8')
-        data = json.loads(body_unicode)
-
+        data = json.loads(request.body.decode('utf-8'))
         email = data.get('email')
         if not email:
             return JsonResponse({'error': 'Email is required'}, status=400)
 
+        # Generate OTP
         code = str(randint(100000, 999999))
 
-        # Mark previous OTPs as verified/used
+        # Mark previous OTPs as used
         OTP.objects.filter(email=email, is_verified=False).update(is_verified=True)
 
         # Create new OTP
         otp = OTP.objects.create(email=email, code=code)
         print(f"📨 New OTP created for {email}: {code}")
 
-        # Send email
-        send_otp(
-        subject="Your OTP Code",
-        message=f"Your OTP is {otp_code}. It expires in 10 minutes.",
-        from_email=settings.EMAIL_HOST_USER,
-        recipient_list=[email]
-        )
+        # Send email via Resend
+        send_otp_email(email, code)  # async thread handled inside send_otp_email
 
-
-        return JsonResponse({'message': f'OTP sent to {email}'})
+        return JsonResponse({'message': f'OTP sent to {email}', 'otp': code}, status=200)
     except Exception as e:
         print("❌ Error sending OTP:", e)
         return JsonResponse({'error': str(e)}, status=500)
