@@ -193,13 +193,14 @@ class ResetPasswordSerializer(serializers.Serializer):
 
 
 # 5️⃣ Send OTP View (Generic)
+
 @method_decorator(csrf_exempt, name='dispatch')
 class SendOTPView(APIView):
     def post(self, request):
         email = request.data.get("email")
         if not email:
             return Response({"error": "Email is required"}, status=400)
-
+        
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
@@ -207,11 +208,13 @@ class SendOTPView(APIView):
 
         # Generate OTP
         otp_code = PasswordResetOTP.generate_otp()
-        otp_obj = PasswordResetOTP.objects.create(user=user, otp=otp_code)
-
-        # 🔹 Log OTP in server console for testing
+        try:
+            otp_obj = PasswordResetOTP.objects.create(user=user, otp=otp_code)
+        except Exception as e:
+            print(f"❌ Error sending OTP: {e}")
+            return Response({"error": str(e)}, status=500)
+        
         print(f"📨 OTP for {email}: {otp_code}")
-
         return Response({"message": f"OTP sent to {email}", "otp": otp_code}, status=200)
 
 # 6️⃣ Verify OTP View
