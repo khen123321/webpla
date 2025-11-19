@@ -8,7 +8,7 @@ from django.contrib.auth.forms import PasswordChangeForm
 from .models import Profile
 from .models import Reward
 from .models import ClaimRequest
-from .forms import RewardForm  # We'll create this next
+from .forms import RewardForm 
 from django.contrib.auth import update_session_auth_hash
 from django.contrib import messages
 from django.core.files.base import ContentFile
@@ -1268,18 +1268,22 @@ def update_bottle_count(request):
 
 @csrf_exempt
 def send_otp(request):
+    if request.method != "POST":
+        return JsonResponse({'error': 'POST request required'}, status=400)
+
     try:
-        data = json.loads(request.body)
+        # Read JSON safely
+        data = json.loads(request.body.decode('utf-8'))
         email = data.get('email')
         if not email:
             return JsonResponse({'error': 'Email is required'}, status=400)
 
         code = str(randint(100000, 999999))
 
-        # 🔄 Mark previous OTPs as verified/used
+        # Mark previous OTPs as used
         OTP.objects.filter(email=email, is_verified=False).update(is_verified=True)
 
-        # ✅ Create new OTP
+        # Create new OTP
         otp = OTP.objects.create(email=email, code=code)
         print(f"📨 New OTP created for {email}: {code}")
 
@@ -1287,7 +1291,7 @@ def send_otp(request):
         send_mail(
             'Your OTP Code',
             f'Your OTP is {code}. It expires in 10 minutes.',
-            'your-email@gmail.com',
+            'p.lament.2025.c@gmail.com',
             [email],
             fail_silently=False
         )
