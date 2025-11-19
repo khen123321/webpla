@@ -58,8 +58,7 @@ from django.contrib.auth import get_user_model
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from .serializers import ForgotPasswordOTPSerializer, VerifyForgotPasswordOTPSerializer
-from django.core.mail import send_mail
-from threading import Thread
+
 
 OTP_STORE = {}
 
@@ -193,8 +192,6 @@ class ResetPasswordSerializer(serializers.Serializer):
         return user
 
 
-def send_otp_email(subject, message, from_email, recipient_list):
-    Thread(target=send_mail, args=(subject, message, from_email, recipient_list)).start()
 
 # 5️⃣ Send OTP View (Generic)
 
