@@ -1,0 +1,466 @@
+{% extends "accounts/base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+<style>
+    .claim-requests-container {
+        padding: 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    .section-title {
+        color: #2c5530;
+        margin-bottom: 20px;
+        font-size: 24px;
+        font-weight: bold;
+    }
+    
+    .requests-section {
+        margin-bottom: 40px;
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #2c5530;
+    }
+    
+    .section-subtitle {
+        color: #2c5530;
+        font-size: 18px;
+        font-weight: bold;
+        margin: 0;
+    }
+    
+    .status-badge {
+        padding: 4px 12px;
+        border-radius: 15px;
+        font-size: 12px;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+    
+    .status-pending {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+    
+    .status-approved {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    
+    .status-rejected {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+    
+    .claim-item {
+        display: flex;
+        align-items: center;
+        padding: 15px;
+        margin-bottom: 10px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background: #fafafa;
+    }
+    
+    .claim-info {
+        flex: 1;
+        margin-right: 20px;
+    }
+    
+    .claim-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 5px;
+    }
+
+    .claim-unique-id {
+        background-color: #2c5530;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: bold;
+        font-family: monospace;
+    }
+    
+    .claim-user {
+        font-weight: bold;
+        color: #2c5530;
+        margin-bottom: 5px;
+    }
+    
+    .claim-reward {
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 5px;
+    }
+    
+    .claim-date {
+        font-size: 12px;
+        color: #999;
+    }
+    
+    .claim-actions {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .approve-btn {
+        background-color: #28a745;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+    
+    .approve-btn:hover {
+        background-color: #218838;
+    }
+
+    .approve-btn:disabled {
+        background-color: #6c757d;
+        cursor: not-allowed;
+    }
+    
+    .reject-btn {
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+    
+    .reject-btn:hover {
+        background-color: #c82333;
+    }
+    
+    .no-requests {
+        text-align: center;
+        color: #666;
+        font-style: italic;
+        padding: 40px;
+    }
+    
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .modal-content {
+        background-color: white;
+        margin: 20px;
+        padding: 25px;
+        border-radius: 10px;
+        width: 450px;
+        max-width: 90%;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    
+    .modal h3 {
+        margin-top: 0;
+        color: #2c5530;
+        margin-bottom: 20px;
+        font-size: 20px;
+    }
+    
+    .modal textarea {
+        width: 100%;
+        height: 100px;
+        margin: 10px 0;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        resize: vertical;
+        font-family: inherit;
+    }
+    
+    .modal-buttons {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 20px;
+    }
+    
+    .cancel-btn {
+        background-color: #6c757d;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+    
+    .cancel-btn:hover {
+        background-color: #5a6268;
+    }
+
+    .confirm-btn {
+        background-color: #28a745;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+    
+    .confirm-btn:hover {
+        background-color: #218838;
+    }
+    
+    .points-info {
+        font-size: 12px;
+        color: #666;
+        margin-top: 5px;
+    }
+
+    /* Form Styles for Approve Modal */
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        color: #333;
+        font-weight: bold;
+        font-size: 14px;
+    }
+
+    .form-group input[type="date"] {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+        font-family: inherit;
+    }
+
+    .date-help {
+        font-size: 12px;
+        color: #666;
+        margin-top: 5px;
+        font-style: italic;
+    }
+
+    .claim-details {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 6px;
+        margin-bottom: 15px;
+        border-left: 4px solid #2c5530;
+    }
+
+    .claim-details strong {
+        color: #2c5530;
+    }
+
+    .detail-item {
+        margin-bottom: 5px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="claim-requests-container">
+    <h2 class="section-title">Manage Claim Requests</h2>
+    
+    <!-- Pending Requests Section -->
+    <div class="requests-section">
+        <div class="section-header">
+            <h3 class="section-subtitle">Pending Requests ({{ pending_requests.count }})</h3>
+        </div>
+        
+        {% if pending_requests %}
+            {% for request in pending_requests %}
+                <div class="claim-item">
+                    <div class="claim-info">
+                        <div class="claim-header">
+                            <div class="claim-user">{{ request.user.get_full_name|default:request.user.username }}</div>
+                            <div class="claim-unique-id">ID: {{ request.unique_id }}</div>
+                        </div>
+                        <div class="claim-reward">Reward: {{ request.reward.name }}</div>
+                        <div class="claim-date">Requested: {{ request.requested_at|date:"M d, Y H:i" }}</div>
+                        <div class="points-info">
+                            User Points: {{ request.user.profile.points }} | Required: {{ request.reward.cost }} | 
+                            Available: {{ request.reward.remaining_quantity }}/{{ request.reward.total_quantity }}
+                        </div>
+                    </div>
+                    <div class="claim-actions">
+                        <button type="button" class="approve-btn" 
+                                onclick="openApproveModal('{{ request.id }}', '{{ request.unique_id }}', '{{ request.user.get_full_name|default:request.user.username|escapejs }}', '{{ request.reward.name|escapejs }}')"
+                                {% if not request.can_approve %}disabled{% endif %}>
+                            Approve
+                        </button>
+                        <button type="button" class="reject-btn" onclick="openRejectModal('{{ request.id }}')">
+                            Reject
+                        </button>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="no-requests">No pending requests at the moment.</div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Approve Modal -->
+<div id="approveModal" class="modal">
+    <div class="modal-content">
+        <h3>Approve Claim Request</h3>
+        <form id="approveForm" method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="edit_id" id="approveClaimId">
+            
+            <div class="form-group">
+                <label>Claim Details:</label>
+                <div class="claim-details">
+                    <div class="detail-item">
+                        <strong>Request ID:</strong> <span id="modalUniqueId"></span>
+                    </div>
+                    <div class="detail-item">
+                        <strong>User:</strong> <span id="modalUserName"></span>
+                    </div>
+                    <div class="detail-item">
+                        <strong>Reward:</strong> <span id="modalRewardName"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="claimByDate">Claim By Date:</label>
+                <input type="date" name="claim_by_date" id="claimByDate" required>
+                <div class="date-help">
+                    User must claim the reward by this date. Default is today - you can extend it if needed.
+                </div>
+            </div>
+            
+            <div class="modal-buttons">
+                <button type="button" class="cancel-btn" onclick="closeApproveModal()">Cancel</button>
+                <button type="submit" class="confirm-btn">Approve Request</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Reject Modal -->
+<div id="rejectModal" class="modal">
+    <div class="modal-content">
+        <h3>Reject Claim Request</h3>
+        <form id="rejectForm" method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="edit_id" id="rejectClaimId">
+            <div class="form-group">
+                <label for="reason">Reason for rejection (optional):</label>
+                <textarea name="reason" id="reason" placeholder="Enter reason for rejection..."></textarea>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="cancel-btn" onclick="closeRejectModal()">Cancel</button>
+                <button type="submit" class="reject-btn">Reject Request</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Approve Modal Functions
+    function openApproveModal(claimId, uniqueId, userName, rewardName) {
+        console.log('Opening approve modal for claim:', claimId);
+        
+        // Set claim details
+        document.getElementById('modalUniqueId').textContent = uniqueId;
+        document.getElementById('modalUserName').textContent = userName;
+        document.getElementById('modalRewardName').textContent = rewardName;
+        document.getElementById('approveClaimId').value = claimId;
+        
+        // Set default date to TODAY instead of 30 days from now
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('claimByDate').value = today;
+        
+        // Set minimum date to today
+        document.getElementById('claimByDate').min = today;
+        
+        // Set form action
+        document.getElementById('approveForm').action = "{% url 'approve_claim' 0 %}".replace('0', claimId);
+        
+        document.getElementById('approveModal').style.display = 'flex';
+    }
+
+    function closeApproveModal() {
+        document.getElementById('approveModal').style.display = 'none';
+        // Don't clear the date value when closing, just hide the modal
+    }
+
+    // Reject Modal Functions
+    function openRejectModal(claimId) {
+        console.log('Opening reject modal for claim:', claimId);
+        document.getElementById('rejectClaimId').value = claimId;
+        document.getElementById('rejectForm').action = "{% url 'reject_claim' 0 %}".replace('0', claimId);
+        document.getElementById('rejectModal').style.display = 'flex';
+    }
+
+    function closeRejectModal() {
+        document.getElementById('rejectModal').style.display = 'none';
+        document.getElementById('reason').value = '';
+    }
+
+    // Close modals when clicking outside
+    window.onclick = function(event) {
+        const approveModal = document.getElementById('approveModal');
+        const rejectModal = document.getElementById('rejectModal');
+        
+        if (event.target == approveModal) {
+            closeApproveModal();
+        }
+        if (event.target == rejectModal) {
+            closeRejectModal();
+        }
+    }
+
+    // Close modals with Escape key
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            closeApproveModal();
+            closeRejectModal();
+        }
+    });
+
+    // Initialize date picker with today's date as minimum and default
+    document.addEventListener('DOMContentLoaded', function() {
+        const today = new Date().toISOString().split('T')[0];
+        const claimByDate = document.getElementById('claimByDate');
+        if (claimByDate) {
+            claimByDate.min = today;
+            // Set default value to today when page loads
+            claimByDate.value = today;
+        }
+    });
+</script>
+{% endblock %}

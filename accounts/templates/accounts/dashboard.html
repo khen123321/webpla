@@ -1,0 +1,258 @@
+{% extends "accounts/base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1>Dashboard</h1>
+        <p class="welcome-text">Connect, Recycle, Innovate. Welcome to P-Lament</p>
+    </div>
+
+    <div class="dashboard-content">
+        <div class="summary-section">
+            <h2 class="section-title">Summary</h2>
+            <div class="summary-item approved">
+                <h3>Approved Claims</h3>
+                <p>{{ total_approved_claims }}</p>
+            </div>
+            <div class="summary-item users">
+                <h3>Total App Users</h3>
+                <p>{{ total_users }}</p>
+            </div>
+            <div class="summary-item denied">
+                <h3>Denied Claims</h3>
+                <p>{{ total_denied_claims }}</p>
+            </div>
+            <div class="summary-item pending">
+                <h3>Pending Claims</h3>
+                <p>{{ total_pending_claims }}</p>
+            </div>
+        </div>
+
+        <div class="graph-section">
+            <h2 class="section-title">User Registrations</h2>
+            <div class="graph-container">
+                <div class="graph-lines">
+                    <div class="graph-line"><span>{{ max_users }}</span></div>
+                    <div class="graph-line"><span>{{ max_users|multiply:0.75|floatformat:0 }}</span></div>
+                    <div class="graph-line"><span>{{ max_users|multiply:0.5|floatformat:0 }}</span></div>
+                    <div class="graph-line"><span>{{ max_users|multiply:0.25|floatformat:0 }}</span></div>
+                    <div class="graph-line"><span>0</span></div>
+                </div>
+                <div class="graph-area">
+                    <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
+                        <path class="graph-path users-color" d="{{ users_graph_path }}" />
+                    </svg>
+                </div>
+                <div class="graph-months">
+                    {% for month in months %}
+                        <div class="graph-month">{{ month }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="requests-section">
+        <div class="section-header">
+            <h3 class="section-subtitle">Recent Activities</h3>
+            <div class="section-controls">
+                {% if processed_requests|length > 3 %}
+                <div class="view-toggle">
+                    <button id="showAllBtn" class="view-btn show-btn">
+                        <span class="btn-icon">↓</span>
+                        Show All
+                    </button>
+                    <button id="hideAllBtn" class="view-btn hide-btn" style="display: none;">
+                        <span class="btn-icon">↑</span>
+                        Show Less
+                    </button>
+                </div>
+                {% endif %}
+                <div class="search-container">
+                    <input type="text" id="searchInput" placeholder="Search by Redemption ID..." class="search-input">
+                    <span class="search-icon">🔍</span>
+                </div>
+            </div>
+        </div>
+        
+        {% if processed_requests %}
+            <div id="recent-activities-container">
+                <!-- Show only first 3 items initially -->
+                <div id="visible-activities">
+                    {% for request in processed_requests|slice:":3" %}
+                    <div class="claim-item" data-request-id="{{ request.id }}" data-unique-id="{{ request.unique_id }}">
+                        <div class="claim-info">
+                            <div class="claim-id">Redemption ID: {{ request.unique_id }}</div>
+                            <div class="claim-user">{{ request.user.get_full_name|default:request.user.username }}</div>
+                            <div class="claim-reward">Reward: {{ request.reward.name }} ({{ request.reward.cost }} points)</div>
+                            <div class="claim-date">
+                                Requested: {{ request.requested_at|date:"M d, Y H:i" }} | 
+                                Processed: {{ request.processed_at|date:"M d, Y H:i" }}
+                            </div>
+                            {% if request.reason %}
+                                <div class="points-info">Reason: {{ request.reason }}</div>
+                            {% endif %}
+                            {% if request.processed_by %}
+                                <div class="points-info">Processed by: {{ request.processed_by.get_full_name|default:request.processed_by.username }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="claim-actions">
+                            <span class="status-badge status-{{ request.status }}">{{ request.get_status_display }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Hidden items that will be shown when "Show All" is clicked -->
+                {% if processed_requests|length > 3 %}
+                <div id="hidden-activities" style="display: none;">
+                    {% for request in processed_requests|slice:"3:" %}
+                    <div class="claim-item" data-request-id="{{ request.id }}" data-unique-id="{{ request.unique_id }}">
+                        <div class="claim-info">
+                            <div class="claim-id">Redemption ID: {{ request.unique_id }}</div>
+                            <div class="claim-user">{{ request.user.get_full_name|default:request.user.username }}</div>
+                            <div class="claim-reward">Reward: {{ request.reward.name }} ({{ request.reward.cost }} points)</div>
+                            <div class="claim-date">
+                                Requested: {{ request.requested_at|date:"M d, Y H:i" }} | 
+                                Processed: {{ request.processed_at|date:"M d, Y H:i" }}
+                            </div>
+                            {% if request.reason %}
+                                <div class="points-info">Reason: {{ request.reason }}</div>
+                            {% endif %}
+                            {% if request.processed_by %}
+                                <div class="points-info">Processed by: {{ request.processed_by.get_full_name|default:request.processed_by.username }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="claim-actions">
+                            <span class="status-badge status-{{ request.status }}">{{ request.get_status_display }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- No results message for search -->
+            <div id="noResults" class="no-results" style="display: none;">
+                <div class="no-results-content">
+                    <span class="no-results-icon">🔍</span>
+                    <p>No activities found matching your search.</p>
+                </div>
+            </div>
+        {% else %}
+            <div class="no-requests">No recent activities to display.</div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Dashboard loaded - initializing functionality');
+        
+        // Graph animations
+        const paths = document.querySelectorAll('.graph-path');
+        paths.forEach(path => {
+            const length = path.getTotalLength();
+            path.style.strokeDasharray = length;
+            path.style.strokeDashoffset = length;
+            path.getBoundingClientRect();
+            path.style.transition = 'stroke-dashoffset 2s ease-out';
+            path.style.strokeDashoffset = '0';
+        });
+
+        // Show/Hide All functionality
+        const showAllBtn = document.getElementById('showAllBtn');
+        const hideAllBtn = document.getElementById('hideAllBtn');
+        const hiddenActivities = document.getElementById('hidden-activities');
+        const visibleActivities = document.getElementById('visible-activities');
+        const searchInput = document.getElementById('searchInput');
+        const noResults = document.getElementById('noResults');
+        const recentActivitiesContainer = document.getElementById('recent-activities-container');
+
+        console.log('Show/Hide elements:', {
+            showAllBtn: showAllBtn ? 'found' : 'not found',
+            hideAllBtn: hideAllBtn ? 'found' : 'not found',
+            hiddenActivities: hiddenActivities ? 'found' : 'not found'
+        });
+
+        if (showAllBtn && hiddenActivities) {
+            showAllBtn.addEventListener('click', function() {
+                console.log('Show All clicked');
+                hiddenActivities.style.display = 'block';
+                showAllBtn.style.display = 'none';
+                hideAllBtn.style.display = 'flex';
+                
+                // Smooth scroll to items
+                setTimeout(() => {
+                    hiddenActivities.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 100);
+            });
+
+            hideAllBtn.addEventListener('click', function() {
+                console.log('Hide All clicked');
+                hiddenActivities.style.display = 'none';
+                showAllBtn.style.display = 'flex';
+                hideAllBtn.style.display = 'none';
+                
+                // Scroll back to top of activities
+                setTimeout(() => {
+                    visibleActivities.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+            });
+        }
+
+        // Search functionality
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.trim().toLowerCase();
+                console.log('Searching for:', searchTerm);
+                
+                const allClaimItems = document.querySelectorAll('.claim-item');
+                let hasVisibleItems = false;
+
+                allClaimItems.forEach(item => {
+                    const claimId = item.querySelector('.claim-id').textContent.toLowerCase();
+                    const uniqueId = item.getAttribute('data-unique-id').toLowerCase();
+                    
+                    // Search both the displayed text and the data attribute
+                    if (claimId.includes(searchTerm) || uniqueId.includes(searchTerm) || searchTerm === '') {
+                        item.style.display = 'flex';
+                        hasVisibleItems = true;
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+
+                // Show/hide no results message
+                if (searchTerm !== '' && !hasVisibleItems) {
+                    noResults.style.display = 'block';
+                    if (recentActivitiesContainer) recentActivitiesContainer.style.display = 'none';
+                } else {
+                    noResults.style.display = 'none';
+                    if (recentActivitiesContainer) recentActivitiesContainer.style.display = 'block';
+                }
+
+                // Auto-show all when searching to see all results
+                if (searchTerm !== '' && hiddenActivities) {
+                    hiddenActivities.style.display = 'block';
+                    if (showAllBtn) showAllBtn.style.display = 'none';
+                    if (hideAllBtn) hideAllBtn.style.display = 'flex';
+                }
+            });
+
+            // Clear search on escape key
+            searchInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    this.value = '';
+                    this.dispatchEvent(new Event('input'));
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

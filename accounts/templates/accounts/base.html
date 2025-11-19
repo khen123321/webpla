@@ -1,0 +1,59 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}P-Lament{% endblock %}</title>
+    <link rel="icon" type="image/png" href="{% static 'logo.png' %}">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="{% if request.path == '/accounts/login/' or request.path == '/' %}login-body{% else %}base-body{% endif %}">
+    {% if request.path != '/accounts/login/' and request.path != '/' %}
+    <!-- Sidebar stays in base.html as requested -->
+    <div class="sidebar">
+        <div class="sidebar-user">
+            {% if user.profile.profile_pic and user.profile.profile_pic.url %}
+                <img src="{{ user.profile.profile_pic.url }}"
+                     alt="User Profile"
+                     class="sidebar-user-pic"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="sidebar-avatar-placeholder" style="display: none;">
+                    {{ user.first_name|first }}{{ user.last_name|first }}
+                </div>
+            {% else %}
+                <div class="sidebar-avatar-placeholder">
+                    {{ user.first_name|first }}{{ user.last_name|first }}
+                </div>
+            {% endif %}
+            <span class="sidebar-user-name">{{ user.get_full_name|default:user.username }}</span>
+        </div>
+
+        <div class="sidebar-header">
+            <h2>P-Lament</h2>
+        </div>
+
+        <ul class="sidebar-menu">
+            <li><a href="{% url 'dashboard' %}"><span class="icon">📊</span> Dashboard</a></li>
+            <li><a href="{% url 'rewards' %}"><span class="icon">🏆</span> Manage Rewards</a></li>
+            <li><a href="{% url 'claim_requests' %}"><span class="icon">📋</span> Claim Requests</a></li>
+            <li><a href="{% url 'users' %}"><span class="icon">👥</span> Registered Users</a></li>
+            <li><a href="{% url 'profile' %}"><span class="icon">👤</span> Profile</a></li>
+            <li class="settings-container">
+                <span class="icon">⚙️</span> Settings
+                <ul class="settings-dropdown">
+                    <li><a href="{% url 'logout' %}" class="logout-btn">Logout</a></li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+    {% endif %}
+
+    <div class="{% if request.path != '/accounts/login/' and request.path != '/' %}content-wrapper{% else %}container{% endif %}">
+        {% block content %}{% endblock %}
+    </div>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

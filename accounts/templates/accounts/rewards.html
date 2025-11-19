@@ -1,0 +1,180 @@
+{% extends "accounts/base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/rewards.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="rewards-container">
+    <h2 class="section-title">Manage Rewards</h2>
+    <button class="add-btn" onclick="openModal()">+ Add New Reward</button>
+
+    {% for reward in rewards %}
+    <div class="reward-item">
+        {% if reward.image %}
+            <img src="{{ reward.image.url }}" alt="{{ reward.name }}" class="reward-image">
+        {% else %}
+            <img src="{% static 'default-reward.png' %}" alt="No image" class="reward-image">
+        {% endif %}
+        <div class="reward-info">
+            <div class="reward-name">Name: {{ reward.name }}</div>
+            <div class="reward-availability">Availability: {{ reward.remaining_quantity }}/{{ reward.total_quantity }}</div>          
+            <div class="reward-availability">Points Required: {{ reward.cost }}</div>
+            <div class="reward-status">
+                Status: 
+                <span class="status-badge {% if reward.available %}available{% else %}unavailable{% endif %}">
+                    {{ reward.available|yesno:"Available,Unavailable" }}
+                </span>
+            </div>
+        </div>        
+        <div class="reward-actions">
+            <button class="edit-btn"
+            onclick="editReward(
+                '{{ reward.id }}',
+                '{{ reward.name }}',
+                '{{ reward.available }}',
+                '{{ reward.cost }}',
+                '{{ reward.total_quantity }}',
+                '{% if reward.image %}{{ reward.image.url }}{% endif %}'
+            )">Edit</button>
+
+            <form method="POST" style="display:inline;">
+                {% csrf_token %}
+                <input type="hidden" name="delete_id" value="{{ reward.id }}">
+                <button type="submit" class="delete-btn">Delete</button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Modal -->
+<div id="addRewardModal" class="modal">
+    <div class="modal-content">
+        <h3 id="modalTitle">Add New Reward</h3>
+        <form method="POST" enctype="multipart/form-data" id="rewardForm">
+            {% csrf_token %}
+            <input type="hidden" name="edit_id" id="rewardId">
+
+            <div class="form-group">
+                <label>Name:</label>
+                <input type="text" name="name" id="rewardName" required>
+            </div>
+
+            <div class="form-group">
+                <label>Available:</label>
+                <select name="available" id="rewardAvailable" onchange="toggleAvailability()">
+                    <option value="True">Yes</option>
+                    <option value="False">No</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Points Required:</label>
+                <input type="number" name="cost" id="rewardPoints" required>
+            </div>
+
+            <div class="form-group">
+                <label>Total Quantity:</label>
+                <input type="number" name="total_quantity" id="rewardQuantity" required>
+                <small id="quantityHelp" style="color: #666; font-size: 12px;">
+                    Changing quantity will reset claimed count to 0
+                </small>
+            </div>
+
+            <div class="form-group">
+                <label>Reset Claimed Count:</label>
+                <input type="checkbox" name="reset_claimed" id="resetClaimed" checked>
+                <small style="color: #666; font-size: 12px;">
+                    Reset claimed count to 0 (recommended when changing quantity)
+                </small>
+            </div>
+
+            <div class="form-group">
+                <label>Reward Image:</label>
+                <input type="file" name="image" id="rewardImage" accept="image/*">
+                <img id="previewImage" src="" alt="Preview" style="max-height: 100px; display: none;">
+            </div>
+
+            <button type="submit" name="add_reward" id="saveButton">Save</button>
+            <button type="button" onclick="closeModal()">Cancel</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    const modal = document.getElementById('addRewardModal');
+    const form = document.getElementById('rewardForm');
+
+    document.getElementById('rewardImage').addEventListener('change', function (e) {
+        const file = e.target.files[0];
+        if (file) {
+            const preview = document.getElementById('previewImage');
+            preview.src = URL.createObjectURL(file);
+            preview.style.display = 'block';
+        }
+    });
+
+    function toggleAvailability() {
+        const available = document.getElementById('rewardAvailable').value === 'True';
+        const pointsInput = document.getElementById('rewardPoints');
+        const quantityInput = document.getElementById('rewardQuantity');
+        
+        if (!available) {
+            // When unavailable, disable and set values to 0
+            pointsInput.disabled = true;
+            quantityInput.disabled = true;
+            pointsInput.value = 0;
+            quantityInput.value = 0;
+        } else {
+            // When available, enable inputs
+            pointsInput.disabled = false;
+            quantityInput.disabled = false;
+        }
+    }
+
+    function openModal(isEdit = false) {
+        document.getElementById('modalTitle').innerText = isEdit ? "Edit Reward" : "Add New Reward";
+        modal.style.display = 'flex';
+        
+        // Reset availability toggle for new rewards
+        if (!isEdit) {
+            setTimeout(toggleAvailability, 100);
+        }
+    }
+
+    function closeModal() {
+        modal.style.display = 'none';
+        form.reset();
+        document.getElementById('rewardId').value = '';
+        document.getElementById('previewImage').style.display = 'none';
+        
+        // Re-enable inputs when closing modal
+        document.getElementById('rewardPoints').disabled = false;
+        document.getElementById('rewardQuantity').disabled = false;
+    }
+
+    function editReward(id, name, available, cost, quantity, imageUrl) {
+        document.getElementById('rewardId').value = id;
+        document.getElementById('rewardName').value = name;
+        document.getElementById('rewardPoints').value = cost;
+        document.getElementById('rewardQuantity').value = quantity;
+        document.getElementById('rewardAvailable').value = (available === "True" || available === true) ? 'True' : 'False';
+
+        if (imageUrl) {
+            document.getElementById('previewImage').src = imageUrl;
+            document.getElementById('previewImage').style.display = 'block';
+        }
+
+        // Trigger availability toggle for edit mode
+        setTimeout(toggleAvailability, 100);
+        openModal(true);
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        toggleAvailability();
+    });
+</script>
+{% endblock %}
