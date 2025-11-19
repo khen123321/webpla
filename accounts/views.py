@@ -1310,7 +1310,7 @@ def send_otp(request):
         send_mail(
             'Your OTP Code',
             f'Your OTP is {code}. It expires in 10 minutes.',
-            'your-email@gmail.com',  # <-- replace with settings.EMAIL_HOST_USER if you want
+            'p.lament.2025.c@gmail.com',  # <-- replace with settings.EMAIL_HOST_USER if you want
             [email],
             fail_silently=False
         )
