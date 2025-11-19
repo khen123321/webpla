@@ -1,1 +1,1 @@
-web: gunicorn core.wsgi
+web: gunicorn webpla.wsgi --timeout 120

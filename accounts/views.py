@@ -58,7 +58,8 @@ from django.contrib.auth import get_user_model
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from .serializers import ForgotPasswordOTPSerializer, VerifyForgotPasswordOTPSerializer
-
+from django.core.mail import send_mail
+from threading import Thread
 
 OTP_STORE = {}
 
@@ -191,6 +192,9 @@ class ResetPasswordSerializer(serializers.Serializer):
         self.validated_data['otp_obj'].delete()
         return user
 
+
+def send_otp_email(subject, message, from_email, recipient_list):
+    Thread(target=send_mail, args=(subject, message, from_email, recipient_list)).start()
 
 # 5️⃣ Send OTP View (Generic)
 
@@ -1307,13 +1311,13 @@ def send_otp(request):
         print(f"📨 New OTP created for {email}: {code}")
 
         # Send email
-        send_mail(
-            'Your OTP Code',
-            f'Your OTP is {code}. It expires in 10 minutes.',
-            'p.lament.2025.c@gmail.com',  # <-- replace with settings.EMAIL_HOST_USER if you want
-            [email],
-            fail_silently=False
+        send_otp(
+        subject="Your OTP Code",
+        message=f"Your OTP is {otp_code}. It expires in 10 minutes.",
+        from_email=settings.EMAIL_HOST_USER,
+        recipient_list=[email]
         )
+
 
         return JsonResponse({'message': f'OTP sent to {email}'})
     except Exception as e:
