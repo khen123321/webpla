@@ -217,6 +217,7 @@ class SendOTPView(APIView):
         print(f"📨 OTP for {email}: {otp_code}")
         return Response({"message": f"OTP sent to {email}", "otp": otp_code}, status=200)
 
+
 # 6️⃣ Verify OTP View
 @method_decorator(csrf_exempt, name='dispatch')
 class VerifyOTPView(APIView):
